@@ -12,8 +12,19 @@ type MCPClient struct {
 	SDKClient *mcp_sdk.Client
 	URL string
 	Transport mcp_sdk.Transport
+
 	tools []mcp_sdk.Tool
 	session *mcp_sdk.ClientSession
+}
+
+func (client *MCPClient) createSession(ctx context.Context) error {
+	session, err := client.SDKClient.Connect(ctx, client.Transport, nil)
+	if err != nil {
+		return err
+	}
+	client.session = session
+	client.tools = nil
+	return nil
 }
 
 func (client *MCPClient) CreateClient(ctx context.Context) error {
@@ -28,13 +39,8 @@ func (client *MCPClient) CreateClient(ctx context.Context) error {
 	client.Transport = &mcp_sdk.StreamableClientTransport{
 		Endpoint: client.URL,
 	}
-
-	session, err := client.SDKClient.Connect(ctx, client.Transport, nil)
-	if err != nil {
-		return err
-	}
-	client.session = session
-	return nil
+	err := client.createSession(ctx)
+	return err
 }
 
 func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
