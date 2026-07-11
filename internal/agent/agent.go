@@ -56,8 +56,8 @@ func (a *Agent) Call(ctx context.Context, input string) (string, error) {
 			return "", err
 		}
 
-		if a.LLM.IsToolCall(chatOutput) {
-			toolName, params, err := a.LLM.ToToolCall(chatOutput)
+		if IsToolCall(chatOutput) {
+			toolName, params, err := ToToolCall(chatOutput)
 			if err != nil {
 				return "", err
 			}
@@ -74,7 +74,7 @@ func (a *Agent) Call(ctx context.Context, input string) (string, error) {
 			continue
 		}
 
-		if a.LLM.IsText(chatOutput) {
+		if IsText(chatOutput) {
 			return chatOutput, nil
 		}
 	}
