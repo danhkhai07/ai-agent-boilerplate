@@ -27,7 +27,7 @@ func (client *MCPClient) createSession(ctx context.Context) error {
 	return nil
 }
 
-func (client *MCPClient) CreateClient(ctx context.Context) error {
+func (client *MCPClient) CreateClient(ctx context.Context, url string) error {
 	if client.SDKClient != nil {
 		return nil
 	}
@@ -36,6 +36,7 @@ func (client *MCPClient) CreateClient(ctx context.Context) error {
 		Version: "v1.0.0",
 	}
 	client.SDKClient = mcp_sdk.NewClient(&impl, nil)
+	client.URL = url
 	client.Transport = &mcp_sdk.StreamableClientTransport{
 		Endpoint: client.URL,
 	}
