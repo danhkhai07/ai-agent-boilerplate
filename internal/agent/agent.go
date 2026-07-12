@@ -31,6 +31,13 @@ type Context struct {
 	Tools []mcp_sdk.Tool
 }
 
+func NewAgent(llm LLMClient, mcpClient *mcp.MCPClient) *Agent {
+	return &Agent{
+		LLM: llm,
+		MCPClient: mcpClient,
+	}
+}
+
 func (a *Agent) Call(ctx context.Context, input string, agentContext *Context) (string, error) {
 	tools, err := a.MCPClient.Tools(ctx)
 	if err != nil {
