@@ -8,6 +8,10 @@ import (
 	mcp_sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+var (
+	ErrClientNotConnected = errors.New("error client is not connected to mcp server")
+)
+
 type MCPClient struct {
 	SDKClient *mcp_sdk.Client
 	URL string
@@ -28,9 +32,6 @@ func (client *MCPClient) createSession(ctx context.Context) error {
 }
 
 func (client *MCPClient) CreateClient(ctx context.Context, url string) error {
-	if client.SDKClient != nil {
-		return nil
-	}
 	impl := mcp_sdk.Implementation{
 		Name: "agent-client",
 		Version: "v1.0.0",
@@ -45,6 +46,9 @@ func (client *MCPClient) CreateClient(ctx context.Context, url string) error {
 }
 
 func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
+	if err := client.createSession(ctx); err != nil {
+		return nil, ErrClientNotConnected
+	}
 	if client.tools != nil {
 		return client.tools, nil
 	}
@@ -61,6 +65,9 @@ func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
 }
 
 func (client *MCPClient) CallTool(ctx context.Context, toolName string, args map[string]any) (string, error) {
+	if err := client.createSession(ctx); err != nil {
+		return "", ErrClientNotConnected
+	}
 	params := mcp_sdk.CallToolParams{
 		Name: toolName,
 		Arguments: args,
