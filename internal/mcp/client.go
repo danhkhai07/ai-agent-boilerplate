@@ -27,7 +27,6 @@ func (client *MCPClient) createSession(ctx context.Context) error {
 		return err
 	}
 	client.session = session
-	client.tools = nil
 	return nil
 }
 
@@ -47,6 +46,7 @@ func NewMCPClient(ctx context.Context, url string) *MCPClient {
 
 func (client *MCPClient) IsConnected(ctx context.Context) bool {
 	if err := client.createSession(ctx); err != nil {
+		client.tools = nil
 		return false
 	}
 	return true
@@ -81,6 +81,7 @@ func (client *MCPClient) CallTool(ctx context.Context, toolName string, args map
 	}
 	callResult, err := client.session.CallTool(ctx, &params)
 	if err != nil {
+		client.tools = nil
 		return "", err
 	}
 
