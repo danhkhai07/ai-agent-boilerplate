@@ -31,7 +31,8 @@ func (client *MCPClient) createSession(ctx context.Context) error {
 	return nil
 }
 
-func (client *MCPClient) CreateClient(ctx context.Context, url string) error {
+func NewMCPClient(ctx context.Context, url string) *MCPClient {
+	client := MCPClient{}
 	impl := mcp_sdk.Implementation{
 		Name: "agent-client",
 		Version: "v1.0.0",
@@ -41,12 +42,18 @@ func (client *MCPClient) CreateClient(ctx context.Context, url string) error {
 	client.Transport = &mcp_sdk.StreamableClientTransport{
 		Endpoint: client.URL,
 	}
-	err := client.createSession(ctx)
-	return err
+	return &client
+}
+
+func (client *MCPClient) IsConnected(ctx context.Context) bool {
+	if err := client.createSession(ctx); err != nil {
+		return false
+	}
+	return true
 }
 
 func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
-	if err := client.createSession(ctx); err != nil {
+	if !client.IsConnected(ctx) {
 		return nil, ErrClientNotConnected
 	}
 	if client.tools != nil {
@@ -65,7 +72,7 @@ func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
 }
 
 func (client *MCPClient) CallTool(ctx context.Context, toolName string, args map[string]any) (string, error) {
-	if err := client.createSession(ctx); err != nil {
+	if !client.IsConnected(ctx) {
 		return "", ErrClientNotConnected
 	}
 	params := mcp_sdk.CallToolParams{
