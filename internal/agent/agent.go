@@ -57,12 +57,7 @@ func (a *Agent) Call(ctx context.Context, input string) (string, error) {
 		}
 
 		if IsToolCall(chatOutput) {
-			toolName, params, err := ToToolCall(chatOutput)
-			if err != nil {
-				return "", err
-			}
-
-			toolOutput, err := a.MCPClient.CallTool(ctx, toolName, params)
+			toolOutput, err := a.MCPClient.CallTool(ctx, chatOutput.ToolName, chatOutput.Args)
 			if err != nil {
 				return "", err
 			}
@@ -75,7 +70,7 @@ func (a *Agent) Call(ctx context.Context, input string) (string, error) {
 		}
 
 		if IsText(chatOutput) {
-			return chatOutput, nil
+			return chatOutput.Text, nil
 		}
 	}
 }
