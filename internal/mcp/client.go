@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrClientNotConnected = errors.New("error client is not connected to mcp server")
+	ErrNoToolsAvailable = errors.New("error no tools is available")
 )
 
 type MCPClient struct {
@@ -21,16 +21,7 @@ type MCPClient struct {
 	session *mcp_sdk.ClientSession
 }
 
-func (client *MCPClient) createSession(ctx context.Context) error {
-	session, err := client.SDKClient.Connect(ctx, client.Transport, nil)
-	if err != nil {
-		return err
-	}
-	client.session = session
-	return nil
-}
-
-func NewMCPClient(ctx context.Context, url string) *MCPClient {
+func NewMCPClient(ctx context.Context, url string) (*MCPClient, error) {
 	client := MCPClient{}
 	impl := mcp_sdk.Implementation{
 		Name: "agent-client",
@@ -41,7 +32,13 @@ func NewMCPClient(ctx context.Context, url string) *MCPClient {
 	client.Transport = &mcp_sdk.StreamableClientTransport{
 		Endpoint: client.URL,
 	}
-	return &client
+
+	session, err := client.SDKClient.Connect(ctx, client.Transport, nil)
+	if err != nil {
+		return nil, err
+	}
+	client.session = session
+	return &client, nil
 }
 
 func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
@@ -61,6 +58,9 @@ func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
 }
 
 func (client *MCPClient) CallTool(ctx context.Context, toolName string, args map[string]any) (string, error) {
+	if tools, _ := client.Tools(ctx); len(tools) == 0 {
+		return "", ErrNoToolsAvailable
+	}
 	params := mcp_sdk.CallToolParams{
 		Name: toolName,
 		Arguments: args,
