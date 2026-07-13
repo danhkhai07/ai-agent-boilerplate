@@ -44,18 +44,7 @@ func NewMCPClient(ctx context.Context, url string) *MCPClient {
 	return &client
 }
 
-func (client *MCPClient) IsConnected(ctx context.Context) bool {
-	if err := client.createSession(ctx); err != nil {
-		client.tools = nil
-		return false
-	}
-	return true
-}
-
 func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
-	if !client.IsConnected(ctx) {
-		return nil, ErrClientNotConnected
-	}
 	if client.tools != nil {
 		return client.tools, nil
 	}
@@ -72,9 +61,6 @@ func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
 }
 
 func (client *MCPClient) CallTool(ctx context.Context, toolName string, args map[string]any) (string, error) {
-	if !client.IsConnected(ctx) {
-		return "", ErrClientNotConnected
-	}
 	params := mcp_sdk.CallToolParams{
 		Name: toolName,
 		Arguments: args,
