@@ -1,6 +1,9 @@
 package agent
 
-import "context"
+import (
+	"agent/internal/domain"
+	"context"
+)
 
 type LLMOutput struct {
 	Text string
@@ -9,7 +12,7 @@ type LLMOutput struct {
 }
 
 type LLMClient interface {
-	 Chat(ctx context.Context, agentContext Context) (*LLMOutput, error)
+	 Chat(ctx context.Context, agentContext domain.Context) (*LLMOutput, error)
 }
 
 func IsText(output *LLMOutput) bool {

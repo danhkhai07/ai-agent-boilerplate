@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"agent/internal/agent"
+	"agent/internal/domain"
+
 	mcp_sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/genai"
 )
@@ -29,13 +31,13 @@ func NewGeminiClient(ctx context.Context, apiKey string) (*GeminiClient, error) 
 	return &geminiClient, nil
 }
 
-func (client *GeminiClient) Chat(ctx context.Context, agentContext agent.Context) (*agent.LLMOutput, error) {
+func (client *GeminiClient) Chat(ctx context.Context, agentContext domain.Context) (*agent.LLMOutput, error) {
 	contents := []*genai.Content{}
 	for _, message := range agentContext.Messages {
 		// Gemini does not have role "tool", so switch role to "user",
 		// and indicates that the text is tool output
-		if message.Role == agent.ToolRole {
-			message.Role = agent.UserRole
+		if message.Role == domain.ToolRole {
+			message.Role = domain.UserRole
 			message.Content = "Tool output: " + message.Content
 		}
 		contents = append(
