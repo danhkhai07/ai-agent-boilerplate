@@ -39,12 +39,7 @@ func NewAgent(llm LLMClient, mcpClient *mcp.MCPClient) *Agent {
 }
 
 func (a *Agent) Call(ctx context.Context, input string, agentContext *Context) (string, error) {
-	tools, err := a.MCPClient.Tools(ctx)
-	if err != nil {
-		agentContext.Tools = tools
-	} else {
-		agentContext.Tools = nil
-	}
+	tools, _ := a.MCPClient.Tools(ctx)
 	agentContext.Tools = tools
 	// System prompt
 	if len(agentContext.Messages) == 0 {
