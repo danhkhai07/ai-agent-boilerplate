@@ -19,6 +19,7 @@ func NewServer(addr string) *Server {
 	server := Server{
 		addr: addr,
 	}
+	server.httpServer.Addr = addr
 	addRoutes(&server)
 	return &server
 }
@@ -27,6 +28,7 @@ func (server *Server) Run(ctx context.Context) {
 	ctx, osCancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer osCancel()
 
+	log.Printf("Server is starting at http://localhost%s\n", server.addr)
 	go func() {
 		err := server.httpServer.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
