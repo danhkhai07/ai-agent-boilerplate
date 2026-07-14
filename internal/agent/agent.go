@@ -36,6 +36,7 @@ func (a *Agent) Call(ctx context.Context, input string, agentContext *domain.Con
 	})
 
 	for {
+		a.MCPClient.Retry(ctx)
 		chatOutput, err := a.LLM.Chat(ctx, *agentContext)
 		if err != nil {
 			return "", err
@@ -46,7 +47,11 @@ func (a *Agent) Call(ctx context.Context, input string, agentContext *domain.Con
 			toolMessage := domain.Message{
 				Role: domain.ToolRole,
 			}
-			if err != nil { toolMessage.Content = err.Error() } else { toolMessage.Content = toolOutput }
+			if err != nil {
+				toolMessage.Content = err.Error()
+			} else {
+				toolMessage.Content = toolOutput
+			}
 			agentContext.Messages = append(agentContext.Messages, toolMessage)
 			continue
 		}

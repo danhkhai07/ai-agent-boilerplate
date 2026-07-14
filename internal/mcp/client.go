@@ -4,8 +4,14 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync/atomic"
+	"time"
 
 	mcp_sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+)
+
+const (
+	DEFAULT_RETRY_TIME = 5 * time.Second
 )
 
 var (
@@ -17,6 +23,7 @@ type MCPClient struct {
 	URL string
 	Transport mcp_sdk.Transport
 
+	retrying atomic.Bool
 	tools []mcp_sdk.Tool
 	session *mcp_sdk.ClientSession
 }
@@ -34,14 +41,48 @@ func NewMCPClient(ctx context.Context, url string) (*MCPClient, error) {
 	}
 
 	session, err := client.SDKClient.Connect(ctx, client.Transport, nil)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		client.session = session
+	} else {
+		client.Retry(ctx)
 	}
-	client.session = session
-	return &client, nil
+	return &client, err
+}
+
+func (client *MCPClient) Retry(ctx context.Context) {
+	if !client.retrying.CompareAndSwap(false, true) {
+		return
+	}
+
+	go func() {
+		defer client.retrying.Store(false)
+		timer := time.NewTicker(DEFAULT_RETRY_TIME)
+		defer timer.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-timer.C:
+				session, err := client.SDKClient.Connect(ctx, client.Transport, nil)
+				if err != nil {
+					continue
+				} 
+
+				client.session = session
+				return
+			}
+		}
+	}()
+}
+
+func (client *MCPClient) IsRetrying() bool {
+	return client.retrying.Load()
 }
 
 func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
+	if client.session == nil {
+		return nil, ErrNoToolsAvailable
+	}
 	if client.tools != nil {
 		return client.tools, nil
 	}
@@ -58,9 +99,10 @@ func (client *MCPClient) Tools(ctx context.Context) ([]mcp_sdk.Tool, error) {
 }
 
 func (client *MCPClient) CallTool(ctx context.Context, toolName string, args map[string]any) (string, error) {
-	if tools, _ := client.Tools(ctx); len(tools) == 0 {
+	if tools, _ := client.Tools(ctx); len(tools) == 0 || client.session == nil {
 		return "", ErrNoToolsAvailable
 	}
+
 	params := mcp_sdk.CallToolParams{
 		Name: toolName,
 		Arguments: args,
