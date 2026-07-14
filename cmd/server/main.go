@@ -1,18 +1,31 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
-	"agent/internal/mcp"
+	"agent/internal/api"
+	"context"
+	"flag"
+	"fmt"
+	"os"
 )
 
-func main() {
-	mcp_server := mcp.NewMCPServer()
+var (
+	port = flag.String("p", "8080", "The port to connect to host server")
+)
 
-	log.Printf("Server started at :8080/mcp\n")
-	if err := http.ListenAndServe(":8080", mcp_server); err != nil {
-		log.Fatalf("Failed to ListenAndServe: %s", err)
+// This binary hosts MCP Server at route '/mcp'
+func main() {
+	flag.Parse()
+	if flag.NArg() > 0 {
+		fmt.Println("Error: Too many arguments")
+		fmt.Printf("Type: '%s -h' for help.\n", os.Args[0])
+		os.Exit(1)
+	} 
+	if flag.NFlag() < 1 { 
+		fmt.Print("Host server at port: ")
+		fmt.Scan(port)
 	}
-	log.Printf("Quit!\n")
+
+	ctx := context.Background()
+	server := api.NewServer(":" + *port)
+	server.Run(ctx)
 }
