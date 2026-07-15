@@ -42,9 +42,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to Gemini: %s", err)
 	}
+	if (*route)[0] != '/' {
+		r := ("/" + *route)
+		route = &r
+	}
 
-	log.Printf("Client is connecting to MCP server at http://localhost:%s/%s\n", *port, *route)
-	mcpClient, err := mcp.NewMCPClient(ctx, "http://localhost:" + *port + "/" + *route)
+	log.Printf("Client is connecting to MCP server at http://localhost:%s%s\n", *port, *route)
+	mcpClient, err := mcp.NewMCPClient(ctx, "http://localhost:" + *port + *route)
 	if err != nil {
 		log.Printf("Failed to connect to MCP Server: %s\n", err)
 		fmt.Printf("Continuing anyways...\n")
