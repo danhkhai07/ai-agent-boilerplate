@@ -57,6 +57,10 @@ func (a *Agent) Call(ctx context.Context, input string, agentContext *domain.Con
 		}
 
 		if IsText(chatOutput) {
+			agentContext.Messages = append(agentContext.Messages, domain.Message{
+				Role: domain.AgentRole,
+				Content: chatOutput.Text,
+			})
 			return chatOutput.Text, nil
 		}
 	}
