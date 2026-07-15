@@ -1,6 +1,7 @@
 package api
 
 import (
+	"agent/internal/application"
 	"context"
 	"log"
 	"net/http"
@@ -11,8 +12,12 @@ import (
 )
 
 type Server struct {
-	addr 			string
-	httpServer 		http.Server
+	addr 				string
+	httpServer 			http.Server
+
+	sessionStore 		application.SessionStore
+	userStore			application.UserStore
+	jwtStore			application.JWTStore
 }
 
 func NewServer(addr string) *Server {

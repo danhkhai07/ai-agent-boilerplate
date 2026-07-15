@@ -25,6 +25,7 @@ type Context struct {
 
 type Session struct {
 	ID string
+	Title string
 	OwnerID string
 	Context Context
 }
