@@ -8,7 +8,13 @@ import (
 func addRoutes(server *Server) {
 	mux := http.NewServeMux()
 
+	// Assume running from binary in build/
+	fs := http.FileServer(http.Dir("../static"))
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	mux.Handle("/mcp", mcp.NewMCPServer())
+
+
 	mux.HandleFunc("GET /c", 			server.GetAllSessions)
 	mux.HandleFunc("GET /c/{id}",		server.GetSession)
 	mux.HandleFunc("POST /c", 			server.PostNewSession)
