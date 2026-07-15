@@ -2,9 +2,12 @@ package main
 
 import (
 	"agent/internal/api"
+	"agent/internal/infra/llm"
+	"agent/internal/infra/store"
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -26,6 +29,16 @@ func main() {
 	}
 
 	ctx := context.Background()
-	server := api.NewServer(":" + *port)
+	gemini, err := llm.NewGeminiClient(ctx, os.Getenv("GEMINI_API_KEY"))
+	if err != nil {
+		log.Fatalf("Failed to connect to Gemini: %s", err)
+	}
+
+	server := api.NewServer(
+		ctx,
+		":" + *port,
+		store.NewMockSessionStore(),
+		gemini,
+	)
 	server.Run(ctx)
 }
