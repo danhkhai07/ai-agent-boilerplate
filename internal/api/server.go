@@ -3,6 +3,7 @@ package api
 import (
 	"agent/internal/agent"
 	"agent/internal/application"
+	"agent/internal/mcp"
 	"context"
 	"log"
 	"net/http"
@@ -16,16 +17,27 @@ type Server struct {
 	addr 				string
 	httpServer 			http.Server
 
-	agent				agent.Agent
+	agent				*agent.Agent
 	sessionStore 		application.SessionStore
 	userStore			application.UserStore
-	jwtStore			application.JWTStore
+	jwtService			application.JWTService
 }
 
-func NewServer(addr string) *Server {
+func NewServer(
+	ctx				context.Context,
+	addr 			string,
+	sessionStore	application.SessionStore,
+	llm				agent.LLMClient,
+) *Server {
 	server := Server{
 		addr: addr,
+		sessionStore: sessionStore,
+		userStore: nil,
+		jwtService: nil,
 	}
+
+	mcpClient, _ := mcp.NewMCPClient(ctx, "http://localhost" + addr + "/mcp")
+	server.agent = agent.NewAgent(llm, mcpClient)
 	server.httpServer.Addr = addr
 	addRoutes(&server)
 	return &server

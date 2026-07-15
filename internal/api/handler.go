@@ -2,10 +2,11 @@ package api
 
 import (
 	"agent/internal/api/dto"
-	"agent/internal/domain"
 	"bytes"
+	"fmt"
 	"encoding/json"
 	"net/http"
+	"os"
 )
 
 func readJSON(w http.ResponseWriter, r *http.Request, v any) bool {
@@ -61,9 +62,8 @@ func (svr *Server) PostMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var message string
-	if !readJSON(w, r, &message) {
-		w.WriteHeader(http.StatusBadRequest)
+	var req dto.PostMessageRequest
+	if !readJSON(w, r, &req) {
 		return
 	}
 	
@@ -74,18 +74,14 @@ func (svr *Server) PostMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Context.Messages = append(
-		session.Context.Messages, 
-		domain.Message{
-			Role: domain.UserRole,
-			Content: message,
-		},
-	)
-
-	agentResponse, err := svr.agent.Call(r.Context(), message, &session.Context)
+	agentResponse, err := svr.agent.Call(r.Context(), req.Message, &session.Context)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+	err = svr.sessionStore.Save(session)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Cannot save session\n")
 	}
 	resp := dto.NewPostMessageResponse(agentResponse)
 	writeJSON(w, resp, http.StatusOK)
