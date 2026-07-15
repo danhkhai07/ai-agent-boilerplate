@@ -33,9 +33,15 @@ func resolveStaticDir() string {
 func addRoutes(server *Server) {
 	mux := http.NewServeMux()
 
+<<<<<<< HEAD
 	// Serve the generated web interface both at / and under the legacy /static path.
 	fs := http.FileServer(http.Dir(resolveStaticDir()))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+=======
+	// Assume running from binary in build/
+	fs := http.FileServer(http.Dir("../static"))
+	mux.Handle("/", fs)
+>>>>>>> boilerplate
 
 	mux.Handle("/mcp", mcp.NewMCPServer())
 	mux.HandleFunc("GET /c", server.GetAllSessions)
@@ -46,5 +52,14 @@ func addRoutes(server *Server) {
 	mux.Handle("GET /{$}", fs)
 	mux.Handle("GET /assets/", fs)
 
+<<<<<<< HEAD
+=======
+	mux.HandleFunc("GET /c", 			server.GetAllSessions)
+	mux.HandleFunc("GET /c/{id}",		server.GetSession)
+	mux.HandleFunc("POST /c", 			server.PostNewSession)
+	mux.HandleFunc("POST /c/{id}", 		server.PostMessage)
+	mux.HandleFunc("DELETE /c/{id}",	server.DeleteSession)
+	
+>>>>>>> boilerplate
 	server.httpServer.Handler = mux
 }

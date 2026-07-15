@@ -65,9 +65,14 @@ func (server *Server) Run(ctx context.Context) {
 		defer cancel()
 		
 		err := server.httpServer.Shutdown(shutdownCtx)
+		go server.Shutdown()
 		if err != nil {
 			log.Fatalf("HTTP Shutdown: %s\n", err)
 		}
 	}()
 	wg.Wait()
+}
+
+func (server *Server) Shutdown() {
+	server.agent.MCPClient.Disconnect()
 }
