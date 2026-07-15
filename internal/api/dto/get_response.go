@@ -2,7 +2,6 @@ package dto
 
 import (
 	"agent/internal/domain"
-	"net/http"
 )
 
 type SessionMetadata struct {
