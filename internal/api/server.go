@@ -1,6 +1,7 @@
 package api
 
 import (
+	"agent/internal/agent"
 	"agent/internal/application"
 	"context"
 	"log"
@@ -15,6 +16,7 @@ type Server struct {
 	addr 				string
 	httpServer 			http.Server
 
+	agent				agent.Agent
 	sessionStore 		application.SessionStore
 	userStore			application.UserStore
 	jwtStore			application.JWTStore

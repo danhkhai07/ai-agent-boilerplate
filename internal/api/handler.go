@@ -81,7 +81,14 @@ func (svr *Server) PostMessage(w http.ResponseWriter, r *http.Request) {
 			Content: message,
 		},
 	)
-	w.WriteHeader(http.StatusOK)
+
+	agentResponse, err := svr.agent.Call(r.Context(), message, &session.Context)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := dto.NewPostMessageResponse(agentResponse)
+	writeJSON(w, resp, http.StatusOK)
 }
 
 func (svr *Server) PostNewSession(w http.ResponseWriter, r *http.Request) {

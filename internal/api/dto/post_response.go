@@ -9,3 +9,13 @@ func NewPostNewSessionResponse(sessionID string) *PostNewSessionResponse {
 		SessionID: sessionID,
 	}
 }
+
+type PostMessageResponse struct {
+	Response string `json:"response"`
+}
+
+func NewPostMessageResponse(response string) *PostMessageResponse {
+	return &PostMessageResponse{
+		Response: response,
+	}
+}
