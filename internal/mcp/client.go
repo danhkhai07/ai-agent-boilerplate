@@ -50,7 +50,9 @@ func NewMCPClient(ctx context.Context, url string) (*MCPClient, error) {
 }
 
 func (client *MCPClient) Disconnect() {
-	client.session.Wait()
+	if client.session != nil {
+		client.session.Close()
+	}
 }
 
 func (client *MCPClient) Retry(ctx context.Context) {

@@ -64,8 +64,8 @@ func (server *Server) Run(ctx context.Context) {
 		shutdownCtx, cancel := context.WithTimeout(shutdownCtx, time.Second * 10)
 		defer cancel()
 		
-		err := server.httpServer.Shutdown(shutdownCtx)
 		go server.Shutdown()
+		err := server.httpServer.Shutdown(shutdownCtx)
 		if err != nil {
 			log.Fatalf("HTTP Shutdown: %s\n", err)
 		}
