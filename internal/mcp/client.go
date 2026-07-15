@@ -49,6 +49,10 @@ func NewMCPClient(ctx context.Context, url string) (*MCPClient, error) {
 	return &client, err
 }
 
+func (client *MCPClient) Disconnect() {
+	client.session.Wait()
+}
+
 func (client *MCPClient) Retry(ctx context.Context) {
 	if !client.retrying.CompareAndSwap(false, true) {
 		return
