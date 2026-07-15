@@ -4,6 +4,7 @@ import (
 	"agent/internal/domain"
 	"agent/internal/mcp"
 	"context"
+	"fmt"
 )
 
 type Agent struct {
@@ -44,6 +45,10 @@ func (a *Agent) Call(ctx context.Context, input string, agentContext *domain.Con
 
 		if IsToolCall(chatOutput) {
 			toolOutput, err := a.MCPClient.CallTool(ctx, chatOutput.ToolName, chatOutput.Args)
+			agentContext.Messages = append(agentContext.Messages, domain.Message{
+				Role: domain.AgentRole,
+				Content: fmt.Sprintf("Tool Call: %s\nArgs: %s", chatOutput.ToolName, chatOutput.Args),
+			})
 			toolMessage := domain.Message{
 				Role: domain.ToolRole,
 			}

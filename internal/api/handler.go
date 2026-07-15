@@ -1,10 +1,12 @@
 package api
 
 import (
+	"agent/internal/agent"
 	"agent/internal/api/dto"
 	"bytes"
-	"fmt"
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 )
@@ -82,6 +84,17 @@ func (svr *Server) PostMessage(w http.ResponseWriter, r *http.Request) {
 	err = svr.sessionStore.Save(session)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Cannot save session\n")
+	}
+	if session.Title == "" {
+		go func() {
+			contextClone := session.Context
+			sessionTitle, err := svr.agent.Call(context.Background(), agent.TITLE_PROMPT, &contextClone)
+			if err != nil {
+				return
+			}
+			session.Title = sessionTitle
+			svr.sessionStore.Save(session)
+		}()
 	}
 	resp := dto.NewPostMessageResponse(agentResponse)
 	writeJSON(w, resp, http.StatusOK)
