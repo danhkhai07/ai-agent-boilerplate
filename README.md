@@ -7,7 +7,6 @@
 
     ```env
     PORT=8080
-    AGENT_STATIC_DIR=/path/to/static/files
     GEMINI_API_KEY=...  # valid Gemini token. Create at Google AI Studio
     ```
 
