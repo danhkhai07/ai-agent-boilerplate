@@ -6,7 +6,9 @@
 
 `
     PORT=8080
+
     AGENT_STATIC_DIR=/path/to/static/files
+
     GEMINI_API_KEY=... # valid Gemini token. Create at Google AI Studio
 `
 
@@ -14,6 +16,7 @@
 
 `
     sudo docker build -t agent-app .
+
     sudo docker run -d -p 8080:8080 --env-file /path/to/.env agent-app
 `
 
