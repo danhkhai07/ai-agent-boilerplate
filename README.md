@@ -5,6 +5,7 @@
 2. Create an .env file with these variables:
 
 `
+
     PORT=8080
 
     AGENT_STATIC_DIR=/path/to/static/files
@@ -15,6 +16,7 @@
 3. Run the following command
 
 `
+
     sudo docker build -t agent-app .
 
     sudo docker run -d -p 8080:8080 --env-file /path/to/.env agent-app
